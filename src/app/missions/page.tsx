@@ -288,7 +288,7 @@ export default function MissionsPage() {
 
   useEffect(() => {
     const state = loadState();
-    if (!state.user?.onboardingComplete) { router.replace('/'); return; }
+    if (!state.user?.onboardingComplete) { router.replace('/get-started'); return; }
     setIds(state.completedHunts.map((h) => h.huntId));
     setStreak(state.streak);
     setHunts(state.hunts);

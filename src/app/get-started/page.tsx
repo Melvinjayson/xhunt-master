@@ -208,7 +208,7 @@ export default function GetStartedPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.replace('/auth/signup?next=/get-started');
+        router.replace('/sign-up');
         return;
       }
       setUserId(user.id);

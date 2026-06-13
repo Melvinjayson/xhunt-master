@@ -70,8 +70,12 @@ export async function proxy(req: NextRequest) {
     // Supabase unreachable (missing/invalid credentials) — treat as unauthenticated
   }
 
-  // Authenticated users hitting sign-in/sign-up → redirect to their dashboard
+  // Authenticated users hitting sign-in/sign-up or marketing root → redirect to app
   if (isAuthRoute(pathname) && session?.user) {
+    return NextResponse.redirect(new URL('/home', req.url));
+  }
+
+  if (pathname === '/' && session?.user) {
     return NextResponse.redirect(new URL('/home', req.url));
   }
 

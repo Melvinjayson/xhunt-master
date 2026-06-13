@@ -271,6 +271,32 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+:root[data-theme="light"] .liquid-nav {
+  background: rgba(232, 238, 248, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
+}
+
+:root[data-theme="light"] .liquid-glass,
+:root[data-theme="light"] .xglass {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.80),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+:root[data-theme="light"] .liquid-glass:hover,
+:root[data-theme="light"] .xglass:hover {
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.90),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
 /* ─── Responsive consumer app container ─── */
 .consumer-app {
   width: 100%;
