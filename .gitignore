@@ -42,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# e2e test scripts and screenshots — local only
+e2e-*.mjs
+e2e-screenshots/
