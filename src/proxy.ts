@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { parseSessionCookie, SESSION_COOKIE } from '@/lib/firebase/session';
 
-const PUBLIC_ROUTES = new Set([
+const PUBLIC_PREFIXES = [
   '/',
   '/about',
   '/blog',
+  '/pricing',
   '/careers',
   '/contact',
-  '/pricing',
-  '/missions',
-  '/sign-in',
-  '/sign-up',
   '/privacy',
   '/terms',
   '/security',
@@ -22,71 +19,56 @@ const PUBLIC_ROUTES = new Set([
   '/marketplace',
   '/mission-control',
   '/get-started',
-]);
+  '/missions',
+  '/sign-in',
+  '/sign-up',
+  '/api/auth/',
+  '/api/contact',
+  '/api/cron/',
+  '/api/stripe/webhook',
+  '/auth/',
+];
+
+const AUTH_PATHS = ['/sign-in', '/sign-up'];
 
 function isPublic(pathname: string): boolean {
-  if (PUBLIC_ROUTES.has(pathname)) return true;
-  for (const prefix of PUBLIC_ROUTES) {
-    if (prefix !== '/' && pathname.startsWith(prefix + '/')) return true;
-  }
-  // API routes that are public
-  if (pathname.startsWith('/api/clerk/')) return true;
-  if (pathname.startsWith('/api/contact')) return true;
-  if (pathname.startsWith('/api/cron/')) return true;
-  if (pathname.startsWith('/api/stripe/webhook')) return true;
-  if (pathname.startsWith('/auth/')) return true;
-  return false;
+  if (pathname === '/') return true;
+  return PUBLIC_PREFIXES.some(p => p !== '/' && pathname.startsWith(p));
 }
 
-const AUTH_ROUTES = new Set(['/sign-in', '/sign-up']);
-function isAuthRoute(pathname: string) {
-  return AUTH_ROUTES.has(pathname) || pathname.startsWith('/sign-in/') || pathname.startsWith('/sign-up/');
+function isAuthPage(pathname: string): boolean {
+  return AUTH_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
 }
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  let response = NextResponse.next({ request: req });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          response = NextResponse.next({ request: req });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        },
-      },
-    }
-  );
-
-  let session = null;
-  try {
-    const result = await supabase.auth.getSession();
-    session = result.data?.session ?? null;
-  } catch {
-    // Supabase unreachable (missing/invalid credentials) — treat as unauthenticated
+  // Allow static assets and Next.js internals through immediately
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    /\.(ico|png|jpg|jpeg|webp|svg|css|js|woff2?|ttf|map)$/.test(pathname)
+  ) {
+    return NextResponse.next();
   }
 
-  // Authenticated users hitting sign-in/sign-up or marketing root → redirect to app
-  if (isAuthRoute(pathname) && session?.user) {
+  const cookieValue = req.cookies.get(SESSION_COOKIE)?.value ?? null;
+  const session     = cookieValue ? await parseSessionCookie(cookieValue) : null;
+  const isAuthed    = session !== null;
+
+  // Authenticated users hitting auth pages or root → send to /home
+  if (isAuthed && (isAuthPage(pathname) || pathname === '/')) {
     return NextResponse.redirect(new URL('/home', req.url));
   }
 
-  if (pathname === '/' && session?.user) {
-    return NextResponse.redirect(new URL('/home', req.url));
+  // Unauthenticated users hitting protected routes → /sign-in
+  if (!isAuthed && !isPublic(pathname)) {
+    const dest = new URL('/sign-in', req.url);
+    dest.searchParams.set('redirect_url', pathname);
+    return NextResponse.redirect(dest);
   }
 
-  // Unauthenticated users hitting protected routes → redirect to sign-in
-  if (!isPublic(pathname) && !session?.user) {
-    const signIn = new URL('/sign-in', req.url);
-    signIn.searchParams.set('redirect_url', pathname);
-    return NextResponse.redirect(signIn);
-  }
-
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
