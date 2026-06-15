@@ -18,7 +18,10 @@ export type IntelligenceFunction =
   | 'marketplace'
   | 'impact'
   | 'governance'
-  | 'foundry';
+  | 'foundry'
+  | 'verification'
+  | 'reward'
+  | 'reputation';
 
 interface AgentCall {
   agentId: string;
@@ -42,12 +45,15 @@ async function callAgent(call: AgentCall): Promise<string> {
 }
 
 const FUNCTION_TO_AGENTS: Record<IntelligenceFunction, string[]> = {
-  personal:    ['discovery-agent'],
-  community:   ['community-catalyst'],
-  marketplace: ['economy-coordinator'],
-  impact:      ['sustainability-navigator'],
-  governance:  ['trust-guardian'],
-  foundry:     ['agent-foundry'],
+  personal:     ['discovery-agent'],
+  community:    ['community-catalyst'],
+  marketplace:  ['economy-coordinator'],
+  impact:       ['sustainability-navigator'],
+  governance:   ['trust-guardian'],
+  foundry:      ['agent-foundry'],
+  verification: ['verification-agent'],
+  reward:       ['reward-agent'],
+  reputation:   ['reputation-agent'],
 };
 
 export interface OrchestratorRequest {
