@@ -371,7 +371,7 @@ export default function HomePage() {
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={1.25} alignItems="center">
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
             {/* Search pill */}
             <Link href="/explore" style={{ textDecoration: 'none' }}>
               <Box sx={{
