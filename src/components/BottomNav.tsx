@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSupabaseUser, useSupabaseSignOut } from '@/hooks/useSupabaseUser';
+import { useUser, useClerk } from '@clerk/nextjs';
 import {
   Home, Compass, Target, MessageSquare, User,
   LogOut, Sun, Moon,
@@ -46,12 +46,13 @@ function ThemeToggleBtn() {
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { user } = useSupabaseUser();
-  const signOut = useSupabaseSignOut();
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const totalUnread = useTotalUnread(user?.id ?? null);
 
-  const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Explorer';
+  const displayName = user?.fullName ?? user?.primaryEmailAddress?.emailAddress?.split('@')[0] ?? 'Explorer';
   const initials = displayName.slice(0, 2).toUpperCase();
+  const avatarUrl = user?.imageUrl;
 
   return (
     <>
@@ -167,11 +168,11 @@ export default function BottomNav() {
 
         {/* User + controls */}
         <div style={{ padding: '10px 10px 14px', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
-          {user && (
+          {isLoaded && user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', marginBottom: 8, borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              {user.user_metadata?.avatar_url ? (
+              {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.user_metadata.avatar_url} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                <img src={avatarUrl} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
                 <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(34,255,170,0.16)', border: '1px solid rgba(34,255,170,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--t-accent)' }}>{initials}</span>
@@ -179,10 +180,10 @@ export default function BottomNav() {
               )}
               <div style={{ minWidth: 0, flex: 1 }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--t-txt)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Explorer'}
+                  {displayName}
                 </p>
                 <p style={{ fontSize: 10.5, color: 'var(--t-faint)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user.email ?? ''}
+                  {user.primaryEmailAddress?.emailAddress ?? ''}
                 </p>
               </div>
             </div>
@@ -191,7 +192,7 @@ export default function BottomNav() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
             <ThemeToggleBtn />
             <button
-              onClick={() => signOut('/')}
+              onClick={() => signOut({ redirectUrl: '/' })}
               title="Sign out"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 10, color: 'var(--t-faint)', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}>
               <LogOut size={16} strokeWidth={2} />

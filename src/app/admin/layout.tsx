@@ -5,27 +5,28 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/client';
+import { useUser } from '@clerk/nextjs';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user: clerkUser, isLoaded } = useUser();
   const [authorized, setAuthorized] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!clerkUser) { router.replace('/sign-in?redirect_url=/admin'); return; }
+
     async function checkAccess() {
       const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      if (!authUser) { router.replace('/sign-in?redirect_url=/admin'); return; }
-
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role, tenant_id, onboarding_complete')
-        .eq('id', authUser.id)
-        .single();
+        .eq('clerk_user_id', clerkUser!.id)
+        .maybeSingle();
 
       if (!profile?.tenant_id || !profile?.onboarding_complete) {
         router.replace('/get-started');
@@ -40,8 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       setAuthorized(true);
     }
-    checkAccess();
-  }, [router]);
+    void checkAccess();
+  }, [isLoaded, clerkUser, router]);
 
   if (!authorized) {
     return (

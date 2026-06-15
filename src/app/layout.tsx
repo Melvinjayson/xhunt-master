@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Onest } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 import { GlassFilter } from '@/components/LiquidGlass';
 import { MuiProvider } from '@/components/MuiProvider';
 import './globals.css';
@@ -75,9 +76,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         {/* Global SVG filter for liquid glass distortion — renders nothing visible */}
         <GlassFilter />
-        <MuiProvider>
-          {children}
-        </MuiProvider>
+        <ClerkProvider>
+          <MuiProvider>
+            {children}
+          </MuiProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
