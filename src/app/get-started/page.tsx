@@ -207,8 +207,10 @@ export default function GetStartedPage() {
   // ── Auth guard ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (authLoading) return;
+
+    // Preview mode: allow access without auth
     if (!user) {
-      router.replace('/sign-up');
+      setAuthChecked(true);
       return;
     }
 

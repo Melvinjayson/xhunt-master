@@ -18,7 +18,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (loading) return;
-    if (!firebaseUser) { router.replace('/sign-in?redirect_url=/admin'); return; }
+
+    // Preview mode: allow access without auth
+    if (!firebaseUser) {
+      setAuthorized(true);
+      return;
+    }
 
     async function checkAccess() {
       const supabase = createClient();

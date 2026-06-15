@@ -26,7 +26,12 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     if (loading) return;
-    if (!firebaseUser) { router.replace('/sign-in?redirect_url=/workspace'); return; }
+
+    // Preview mode: show workspace with a guest state when not authenticated
+    if (!firebaseUser) {
+      setUser({ orgName: 'Preview Org', plan: 'pro', userName: 'Preview User', userRole: 'tenant_admin', avatarUrl: null });
+      return;
+    }
 
     async function boot() {
       const supabase = createClient();

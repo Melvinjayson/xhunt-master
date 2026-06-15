@@ -203,8 +203,14 @@ export default function HomePage() {
 
   useEffect(() => {
     if (authLoading) return;
+
+    // Preview mode: no auth required — show page with available data
     if (!user) {
-      router.replace('/sign-in');
+      setCheckingOnboarding(false);
+      void fetchSupabaseMissions().then(r => {
+        if (r?.length) setHunts(r);
+        setMounted(true);
+      }).catch(() => setMounted(true));
       return;
     }
 
