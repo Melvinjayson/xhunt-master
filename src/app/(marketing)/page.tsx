@@ -804,21 +804,21 @@ export default function RootPage() {
             {/* Left — copy */}
             <div>
               <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-3">
-                Proximity Intelligence
+                Right place, right time
               </motion.p>
               <motion.h2 variants={fadeUp} custom={0.06}
                 className="text-[clamp(1.9rem,3.5vw,2.8rem)] font-black text-[#F0F4FF] leading-tight tracking-tight mb-5">
-                Missions find you.
+                Paid gigs show up
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22FFAA] to-[#6D5DFD]">
-                  Wherever you are.
+                  where you already are.
                 </span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={0.12}
                 className="text-[14px] text-[#8B9CC0] leading-relaxed mb-8">
-                The Mission Architect AI uses your GPS location to surface gigs within reach right now.
-                Walk to the gym, explore a neighbourhood, or check into a venue — X-Hunt knows you&apos;re there
-                and queues missions that match your proximity, preferences, and Hunter Score.
+                Already heading to the gym? There might be a brand paying $45 for that.
+                Walking around your city? Someone will pay you to review local spots.
+                X-Hunt uses your location to surface real gigs from real brands — matched to what you&apos;re already doing.
               </motion.p>
               <div className="flex flex-col gap-3">
                 {[
@@ -908,7 +908,7 @@ export default function RootPage() {
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] bg-[#22FFAA]/4 blur-[120px] rounded-full" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050816] via-[#050816]/80 to-transparent" />
         </div>
-        <div className="relative z-10 max-w-3xl mx-auto px-5 sm:px-6 lg:px-8 text-center lg:text-left">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-5">Ready to start?</motion.p>
           <motion.h2 variants={fadeUp} custom={0.07}
             className="text-[clamp(2.2rem,5vw,3.8rem)] font-black text-[#F0F4FF] leading-[1.04] tracking-tighter mb-5">
