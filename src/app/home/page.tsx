@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUser } from '@clerk/nextjs';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -187,7 +187,7 @@ function ProgressBar({ label, pct, color }: { label: string; pct: number; color:
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, loading: authLoading } = useFirebaseAuth();
   const [hunts, setHunts]             = useState<Hunt[]>([]);
   const [completedIds, setIds]         = useState<string[]>([]);
   const [activeMissionSteps, setAMS]  = useState(0);
@@ -202,7 +202,7 @@ export default function HomePage() {
   const [aiConfig, setAIConfig]        = useState<AIConfig>(DEFAULT_AI_CONFIG);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (authLoading) return;
     if (!user) {
       router.replace('/sign-in');
       return;
@@ -214,7 +214,7 @@ export default function HomePage() {
         const { data: userProfile } = await supabase
           .from('user_profiles')
           .select('onboarding_complete')
-          .eq('clerk_user_id', user!.id)
+          .eq('clerk_user_id', user!.uid)
           .maybeSingle();
 
         if (!userProfile?.onboarding_complete) {
@@ -247,9 +247,9 @@ export default function HomePage() {
     }
 
     void bootstrap();
-  }, [isLoaded, user, router]);
+  }, [authLoading, user, router]);
 
-  if (!isLoaded || checkingOnboarding) {
+  if (authLoading || checkingOnboarding) {
     return (
       <Box sx={{ minHeight: '100vh', background: 'var(--t-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2 }}>
         <CircularProgress size={32} sx={{ color: 'var(--t-accent)' }} />
@@ -271,7 +271,7 @@ export default function HomePage() {
   const tierClr    = mms >= 700 ? '#FFB84D' : mms >= 400 ? '#6D5DFD' : mms >= 150 ? '#22FFAA' : '#4A5578';
   const aColor     = ARCHETYPE_COLORS[profile?.archetype ?? ''] ?? '#22FFAA';
 
-  const userName = user?.firstName ?? user?.fullName ?? user?.primaryEmailAddress?.emailAddress?.split('@')[0] ?? 'Explorer';
+  const userName = user?.displayName?.split(' ')[0] ?? user?.displayName ?? user?.email?.split('@')[0] ?? 'Explorer';
 
   /* ── Right rail (desktop) ── */
   const rightRail = (

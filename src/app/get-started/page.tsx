@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowRight, Sparkles, Brain, Shield, Lock } from 'lucide-react';
 import { saveState, loadState, saveProfile } from '@/lib/store';
 import { createClient } from '@/lib/supabase/client';
-import { useUser } from '@clerk/nextjs';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 import type { ImpactProfile } from '@/lib/types';
 
 /* ─── design tokens ─── */
@@ -190,7 +190,7 @@ function ImpactDNAReveal({ profile, onContinue }: { profile: ImpactProfile; onCo
 /* ─── Main page ─── */
 export default function GetStartedPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, loading: authLoading } = useFirebaseAuth();
   const [authChecked, setAuthChecked] = useState(false);
   const [userId, setUserId]           = useState<string | null>(null);
   const [messages, setMessages]       = useState<Message[]>([]);
@@ -206,21 +206,21 @@ export default function GetStartedPage() {
 
   // ── Auth guard ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!isLoaded) return;
+    if (authLoading) return;
     if (!user) {
       router.replace('/sign-up');
       return;
     }
 
     async function checkOnboarding() {
-      setUserId(user!.id);
+      setUserId(user!.uid);
 
       try {
         const supabase = createClient();
         const { data: profile } = await supabase
           .from('user_profiles')
           .select('onboarding_complete')
-          .eq('clerk_user_id', user!.id)
+          .eq('clerk_user_id', user!.uid)
           .maybeSingle();
 
         if (profile?.onboarding_complete) {
@@ -234,7 +234,7 @@ export default function GetStartedPage() {
       setAuthChecked(true);
     }
     void checkOnboarding();
-  }, [isLoaded, user, router]);
+  }, [authLoading, user, router]);
 
   // Seed Xeno's opening message
   useEffect(() => {
@@ -312,7 +312,7 @@ export default function GetStartedPage() {
             interests:           data.profile.causes,
             goals:               data.profile.motivations,
             onboarding_complete: true,
-          }).eq('clerk_user_id', userId);
+          }).eq('clerk_user_id', userId ?? '');
         }
 
         setTimeout(() => { setProfile(data.profile!); setPhase('complete'); }, 2800);

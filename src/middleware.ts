@@ -1,54 +1,75 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { parseSessionCookie, SESSION_COOKIE } from '@/lib/firebase/session';
 
-const isPublicRoute = createRouteMatcher([
+const PUBLIC_PREFIXES = [
   '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/about(.*)',
-  '/blog(.*)',
-  '/pricing(.*)',
-  '/careers(.*)',
-  '/contact(.*)',
-  '/privacy(.*)',
-  '/terms(.*)',
-  '/security(.*)',
-  '/cookies(.*)',
-  '/consumer(.*)',
-  '/enterprise(.*)',
-  '/developers(.*)',
-  '/use-cases(.*)',
-  '/marketplace(.*)',
-  '/mission-control(.*)',
-  '/missions',
-  '/get-started(.*)',
-  '/api/contact(.*)',
-  '/api/cron/(.*)',
-  '/api/stripe/webhook(.*)',
-  '/api/clerk/(.*)',
-  '/auth/(.*)',
-]);
+  '/about',
+  '/blog',
+  '/pricing',
+  '/careers',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/security',
+  '/cookies',
+  '/consumer',
+  '/enterprise',
+  '/developers',
+  '/use-cases',
+  '/marketplace',
+  '/mission-control',
+  '/get-started',
+  '/missions',          // public list view
+  '/sign-in',
+  '/sign-up',
+  '/api/auth/',
+  '/api/contact',
+  '/api/cron/',
+  '/api/stripe/webhook',
+  '/auth/',
+];
 
-const isAuthRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)']);
+const AUTH_PATHS = ['/sign-in', '/sign-up'];
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+function isPublic(pathname: string): boolean {
+  if (pathname === '/') return true;
+  return PUBLIC_PREFIXES.some(p => p !== '/' && pathname.startsWith(p));
+}
+
+function isAuthPage(pathname: string): boolean {
+  return AUTH_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
+}
+
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (userId && isAuthRoute(req)) {
+  // Allow static assets and Next.js internals through immediately
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    /\.(ico|png|jpg|jpeg|webp|svg|css|js|woff2?|ttf|map)$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
+  const cookieValue = req.cookies.get(SESSION_COOKIE)?.value ?? null;
+  const session     = cookieValue ? await parseSessionCookie(cookieValue) : null;
+  const isAuthed    = session !== null;
+
+  // Authenticated users hitting auth pages or root → send to /home
+  if (isAuthed && (isAuthPage(pathname) || pathname === '/')) {
     return NextResponse.redirect(new URL('/home', req.url));
   }
 
-  if (userId && pathname === '/') {
-    return NextResponse.redirect(new URL('/home', req.url));
+  // Unauthenticated users hitting protected routes → /sign-in
+  if (!isAuthed && !isPublic(pathname)) {
+    const dest = new URL('/sign-in', req.url);
+    dest.searchParams.set('redirect_url', pathname);
+    return NextResponse.redirect(dest);
   }
 
-  if (!isPublicRoute(req) && !userId) {
-    const signInUrl = new URL('/sign-in', req.url);
-    signInUrl.searchParams.set('redirect_url', pathname);
-    return NextResponse.redirect(signInUrl);
-  }
-});
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

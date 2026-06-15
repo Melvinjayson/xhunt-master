@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",
-    "@clerk/nextjs": "^7.5.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.1.1",
@@ -20,6 +19,8 @@
     "@supabase/supabase-js": "^2.108.0",
     "@xyflow/react": "^12.11.0",
     "clsx": "^2.1.1",
+    "firebase": "^11.9.0",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.40.0",
     "groq-sdk": "^1.2.1",
     "lucide-react": "^1.17.0",

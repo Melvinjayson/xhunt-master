@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar';
 import { createClient } from '@/lib/supabase/client';
-import { useUser } from '@clerk/nextjs';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 
 interface WorkspaceUser {
   orgName: string;
@@ -18,22 +18,22 @@ interface WorkspaceUser {
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: firebaseUser, loading } = useFirebaseAuth();
   const [user, setUser] = useState<WorkspaceUser | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!clerkUser) { router.replace('/sign-in?redirect_url=/workspace'); return; }
+    if (loading) return;
+    if (!firebaseUser) { router.replace('/sign-in?redirect_url=/workspace'); return; }
 
     async function boot() {
       const supabase = createClient();
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role, tenant_id, display_name, avatar_url, onboarding_complete')
-        .eq('clerk_user_id', clerkUser!.id)
+        .eq('clerk_user_id', firebaseUser!.uid)
         .maybeSingle();
 
       if (!profile?.tenant_id || !profile?.onboarding_complete) {
@@ -62,7 +62,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
       });
     }
     void boot();
-  }, [isLoaded, clerkUser, router]);
+  }, [loading, firebaseUser, router]);
 
   if (!user) {
     return (

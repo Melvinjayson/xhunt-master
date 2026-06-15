@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useFirebaseAuth, useFirebaseSignOut } from '@/hooks/useFirebaseUser';
 import {
   Home, Compass, Target, MessageSquare, User,
   LogOut, Sun, Moon,
@@ -46,13 +46,13 @@ function ThemeToggleBtn() {
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
-  const totalUnread = useTotalUnread(user?.id ?? null);
+  const { user, loading } = useFirebaseAuth();
+  const signOut = useFirebaseSignOut();
+  const totalUnread = useTotalUnread(user?.uid ?? null);
 
-  const displayName = user?.fullName ?? user?.primaryEmailAddress?.emailAddress?.split('@')[0] ?? 'Explorer';
+  const displayName = user?.displayName ?? user?.email?.split('@')[0] ?? 'Explorer';
   const initials = displayName.slice(0, 2).toUpperCase();
-  const avatarUrl = user?.imageUrl;
+  const avatarUrl = user?.photoURL;
 
   return (
     <>
@@ -168,7 +168,7 @@ export default function BottomNav() {
 
         {/* User + controls */}
         <div style={{ padding: '10px 10px 14px', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
-          {isLoaded && user && (
+          {!loading && user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', marginBottom: 8, borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -183,7 +183,7 @@ export default function BottomNav() {
                   {displayName}
                 </p>
                 <p style={{ fontSize: 10.5, color: 'var(--t-faint)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user.primaryEmailAddress?.emailAddress ?? ''}
+                  {user.email ?? ''}
                 </p>
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function BottomNav() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
             <ThemeToggleBtn />
             <button
-              onClick={() => signOut({ redirectUrl: '/' })}
+              onClick={() => signOut()}
               title="Sign out"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 10, color: 'var(--t-faint)', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}>
               <LogOut size={16} strokeWidth={2} />
