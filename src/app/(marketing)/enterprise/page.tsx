@@ -160,7 +160,7 @@ export default function EnterprisePage() {
               className="inline-flex items-center gap-2 bg-ai/8 border border-ai/20 rounded-full px-3.5 py-1.5 mb-8"
             >
               <Building2 size={12} className="text-ai" strokeWidth={2.5} />
-              <span className="text-[12px] font-semibold text-ai tracking-wide">Enterprise Platform</span>
+              <span className="text-[12px] font-semibold text-ai tracking-wide">For Organisations · Brands · Governments · NGOs</span>
             </motion.div>
 
             <motion.h1
@@ -169,10 +169,11 @@ export default function EnterprisePage() {
               transition={{ duration: 0.6, delay: 0.08 }}
               className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-black text-txt leading-[1.04] tracking-tighter mb-6"
             >
-              The Mission OS for
+              Deploy missions.
+              <br />Verify outcomes.
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai to-ai-dark">
-                enterprise outcomes.
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai to-[#22FFAA]">
+                Measure real participation.
               </span>
             </motion.h1>
 
@@ -182,8 +183,10 @@ export default function EnterprisePage() {
               transition={{ duration: 0.55, delay: 0.18 }}
               className="text-[1.1rem] text-txt-dim leading-relaxed max-w-[580px] mb-10"
             >
-              A full-stack platform for workforce transformation, customer engagement,
-              and measurable behavioural outcomes — governed, compliant, and built for scale.
+              X-Hunt gives organisations the infrastructure to create real-world missions,
+              reach verified participants, and automatically confirm outcomes through AI.
+              Used by brands, government programmes, NGOs, and enterprise teams — anywhere
+              participation needs to be coordinated, verified, and rewarded at scale.
             </motion.p>
 
             <motion.div
@@ -244,12 +247,12 @@ export default function EnterprisePage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <motion.p variants={fadeUp} className="text-[12px] font-bold text-ai uppercase tracking-widest mb-3">
-              Platform Architecture
+              Platform Modules
             </motion.p>
             <motion.h2 variants={fadeUp} custom={0.06} className="text-[clamp(1.9rem,3.8vw,3rem)] font-black text-txt leading-tight tracking-tight">
-              Everything you need to run
+              Everything you need to deploy
               <br />
-              mission programs at scale.
+              and verify missions at scale.
             </motion.h2>
           </div>
 
@@ -290,12 +293,12 @@ export default function EnterprisePage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <motion.p variants={fadeUp} className="text-[12px] font-bold text-accent uppercase tracking-widest mb-3">
-              Use Cases
+              Who it&apos;s for
             </motion.p>
             <motion.h2 variants={fadeUp} custom={0.06} className="text-[clamp(1.9rem,3.8vw,3rem)] font-black text-txt leading-tight tracking-tight">
-              Proven outcomes across
+              Brands. Governments. NGOs.
               <br />
-              every enterprise function.
+              Employers. Communities.
             </motion.h2>
           </div>
 
@@ -369,15 +372,14 @@ export default function EnterprisePage() {
             variants={fadeUp}
             className="text-[clamp(2rem,4.5vw,3.5rem)] font-black text-txt leading-[1.05] tracking-tighter mb-6"
           >
-            Ready to deploy the
+            Ready to deploy your
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai to-ai-dark">
-              Mission OS?
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai to-[#22FFAA]">
+              first mission?
             </span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={0.08} className="text-[1rem] text-txt-dim mb-10 max-w-[420px] mx-auto">
-            Our enterprise team will design a deployment strategy tailored to your outcomes and
-            organisation. No generic demos — just your use case.
+          <motion.p variants={fadeUp} custom={0.08} className="text-[1rem] text-txt-dim mb-10 max-w-[460px] mx-auto">
+            Whether you&apos;re a brand activating communities, a government mobilising citizens, or an NGO tracking real-world impact — we&apos;ll design a deployment strategy around your specific outcomes.
           </motion.p>
           <motion.div variants={fadeUp} custom={0.16} className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

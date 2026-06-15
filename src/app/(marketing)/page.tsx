@@ -545,7 +545,7 @@ function AppMocksSection() {
             </div>
 
             <motion.div variants={fadeUp} custom={0.52} className="mt-8 flex flex-wrap gap-3">
-              <Link href="/sign-up"
+              <Link href="/home"
                 className="flex items-center gap-2.5 h-12 px-6 bg-accent text-[#050816] rounded-xl text-[14px] font-bold shadow-[0_0_24px_rgba(34,255,170,0.3)] hover:shadow-[0_0_40px_rgba(34,255,170,0.5)] transition-all">
                 Find your first mission <ArrowRight size={15} strokeWidth={2.8} />
               </Link>
@@ -657,41 +657,42 @@ export default function RootPage() {
                 className="inline-flex items-center gap-2.5 mb-8"
                 style={{ background: 'rgba(34,255,170,.06)', border: '1px solid rgba(34,255,170,.15)', borderRadius: 999, padding: '6px 16px' }}>
                 <div className="w-1.5 h-1.5 bg-[#22FFAA] rounded-full animate-pulse" />
-                <span className="text-[11px] font-semibold text-[#22FFAA] tracking-wider uppercase">Free to join · No followers needed · First mission in 15 sec</span>
+                <span className="text-[11px] font-semibold text-[#22FFAA] tracking-wider uppercase">AI Participation Platform · Individuals · Brands · Governments</span>
               </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
                 className="text-[clamp(2.8rem,5.5vw,4.8rem)] font-black text-[#F0F4FF] leading-[1.04] tracking-tighter mb-6">
-                Brands pay you
-                <br />to do real things.
+                Your skills are worth more
+                <br />than you&apos;re getting paid for.
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22FFAA] to-[#6D5DFD]">
-                  AI confirms it instantly.
+                  X-Hunt closes that gap.
                 </span>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.22 }}
                 className="text-[1.08rem] text-[#8B9CC0] leading-relaxed max-w-[540px] mb-3">
-                Pick a mission — hit the gym, explore your city, try a product.
-                Upload your proof. AI validates it in seconds. Escrow releases automatically.
-                <strong className="text-[#F0F4FF]"> No followers, no content skills, no pitch decks.</strong>
+                Brands, companies, and organizations post real-world missions.
+                You complete them — go to the gym, visit a location, try a product, attend an event.
+                AI verifies your proof automatically.
+                <strong className="text-[#F0F4FF]"> Escrow releases. You get paid.</strong>
               </motion.p>
 
               <motion.p
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
                 className="text-[13px] text-[#4A5578] mb-10">
-                You do the thing. AI verifies it. Brand pays you. That&apos;s it.
+                No followers needed. No CV. No middleman. Just show up, prove it, and earn.
               </motion.p>
 
               <motion.div
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.38 }}
                 className="flex flex-wrap gap-x-8 gap-y-3 mb-12">
                 {[
-                  { value: '5,800+', label: 'Open missions right now' },
-                  { value: '$74', label: 'Average payout per mission' },
-                  { value: '96%', label: 'Payout success rate' },
+                  { value: '5,800+', label: 'Active missions globally' },
+                  { value: '$74', label: 'Average reward per mission' },
+                  { value: '96%', label: 'Verified payout rate' },
                   { value: '<45s', label: 'Average AI validation time' },
                 ].map((m) => (
                   <div key={m.label}>
@@ -706,19 +707,19 @@ export default function RootPage() {
                 className="flex flex-wrap gap-3">
                 <Link href="/home"
                   className="flex items-center gap-2.5 h-13 px-7 bg-[#22FFAA] text-[#050816] rounded-xl text-[15px] font-bold shadow-[0_0_28px_rgba(34,255,170,0.3)] hover:shadow-[0_0_44px_rgba(34,255,170,0.5)] transition-all duration-200">
-                  Start hunting free <ArrowRight size={16} strokeWidth={2.8} />
+                  Find your mission <ArrowRight size={16} strokeWidth={2.8} />
                 </Link>
                 <Link href="/workspace"
                   className="flex items-center gap-2.5 h-13 px-6 border text-[#8B9CC0] rounded-xl text-[15px] font-semibold hover:text-[#F0F4FF] transition-all duration-200"
                   style={{ background: 'rgba(255,255,255,.04)', borderColor: 'rgba(255,255,255,.09)' }}>
-                  Brand workspace
+                  Post a mission for your org
                 </Link>
               </motion.div>
 
               <motion.p
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.62 }}
                 className="mt-5 text-[12px] text-[#4A5578]">
-                Already have an account?{' '}
+                Free to join · No followers needed ·{' '}
                 <Link href="/home" className="text-[#22FFAA] underline underline-offset-2 hover:opacity-80 transition-opacity">
                   Open app →
                 </Link>
@@ -733,10 +734,10 @@ export default function RootPage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {[
-              { icon: '🏋️', text: '"Earned $120 just from my gym routine. Wild."' },
-              { icon: '📍', text: '"Got paid $75 to explore Lagos. Felt like a game."' },
-              { icon: '🥗', text: '"Tried a product I actually liked. Got $75 for it."' },
-              { icon: '⭐', text: '"My Hunter Score is 7.1. Brands approach me now."' },
+              { icon: '🏋️', text: '"Earned $120 just from my regular gym routine."' },
+              { icon: '📍', text: '"Got paid $75 to explore my own city. Didn\'t feel like work."' },
+              { icon: '🏢', text: '"We ran a city-wide mission campaign. 2,400 verified participants."' },
+              { icon: '⭐', text: '"Reputation score 7.1. Organisations now reach out to me."' },
             ].map((q, i) => (
               <div key={i} className="flex items-center gap-2.5 text-[12px] text-[#8B9CC0]">
                 <span>{q.icon}</span>
@@ -754,9 +755,9 @@ export default function RootPage() {
       <Sec className="py-24 lg:py-32 border-y border-[rgba(255,255,255,.05)]" style={{ background: '#07101F' }}>
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-3">The simple version</motion.p>
+            <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-3">How it works</motion.p>
             <motion.h2 variants={fadeUp} custom={0.06} className="text-[clamp(1.9rem,3.5vw,2.8rem)] font-black text-[#F0F4FF] leading-tight tracking-tight">
-              How X-Hunt works in plain English.
+              Simple for everyone involved.
             </motion.h2>
           </div>
 
@@ -764,21 +765,21 @@ export default function RootPage() {
             {[
               {
                 step: '01', icon: '🗺️', color: '#22FFAA',
-                title: 'A brand posts a mission',
-                body: 'FitLife wants people to complete a 7-day workout streak. They post a mission, lock $45 per person into escrow, and wait for hunters.',
-                note: 'Brands pay upfront. You never have to chase anyone.',
+                title: 'An organisation posts a mission',
+                body: 'A brand, company, NGO, or government creates a mission — a real-world task they want people to complete. They fund the rewards upfront into escrow before anyone accepts.',
+                note: 'Organisations pay in advance. Participants never chase anyone.',
               },
               {
                 step: '02', icon: '✅', color: '#6D5DFD',
-                title: 'You accept it and do it',
-                body: 'You browse missions, accept one that fits your life, and actually do it. GPS tracks your location. You upload photos or logs as evidence.',
-                note: 'The app walks you through every step. No guessing.',
+                title: 'You find it and complete it',
+                body: 'The app surfaces missions matched to your location, skills, and profile. Accept one, do it — attend an event, complete a challenge, visit a location — then upload your proof.',
+                note: 'The platform guides every step. No guessing.',
               },
               {
                 step: '03', icon: '💸', color: '#FFB84D',
-                title: 'AI validates. You get paid.',
-                body: 'Our AI checks your evidence automatically — usually under 60 seconds. If it checks out, escrow releases. Money goes straight to your wallet.',
-                note: 'No humans reviewing. No waiting 30 days. No disputes.',
+                title: 'AI verifies. Reward releases.',
+                body: 'The verification AI checks your submission automatically — GPS, photo, timestamp, and any third-party signals. If it confirms, escrow releases and your reward arrives instantly.',
+                note: 'No human gatekeepers. No 30-day payment cycles. No disputes.',
               },
             ].map((item, i) => (
               <motion.div key={item.step} variants={fadeUp} custom={i * 0.1}
@@ -873,10 +874,10 @@ export default function RootPage() {
       <Sec className="py-24 lg:py-32 border-y border-[rgba(255,255,255,.05)]" style={{ background: '#050816' }}>
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-3">Why it works</motion.p>
+            <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-3">Why participants trust it</motion.p>
             <motion.h2 variants={fadeUp} custom={0.06} className="text-[clamp(1.9rem,3.5vw,2.8rem)] font-black text-[#F0F4FF] leading-tight tracking-tight">
-              We built the boring parts
-              <br />so you just have to show up.
+              We built the infrastructure.
+              <br />You just show up and deliver.
             </motion.h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
@@ -909,28 +910,28 @@ export default function RootPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#050816] via-[#050816]/80 to-transparent" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-5">Ready to start?</motion.p>
+          <motion.p variants={fadeUp} className="text-[11px] font-bold text-[#4A5578] uppercase tracking-widest mb-5">Join the mission economy</motion.p>
           <motion.h2 variants={fadeUp} custom={0.07}
             className="text-[clamp(2.2rem,5vw,3.8rem)] font-black text-[#F0F4FF] leading-[1.04] tracking-tighter mb-5">
-            What are you doing this week
+            Human capability meets
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22FFAA] to-[#6D5DFD]">that someone would pay for?</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22FFAA] to-[#6D5DFD]">meaningful opportunity.</span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={0.14} className="text-[15px] text-[#8B9CC0] max-w-[480px] mb-3">
-            Seriously — going to the gym, exploring new places, trying new products. There&apos;s probably a brand willing to pay you for that right now.
+          <motion.p variants={fadeUp} custom={0.14} className="text-[15px] text-[#8B9CC0] max-w-[540px] mb-3">
+            Whether you&apos;re here to find missions and earn, or to deploy missions and reach real participants — X-Hunt is built for both sides of that equation.
           </motion.p>
           <motion.p variants={fadeUp} custom={0.2} className="text-[12px] text-[#4A5578] mb-10">
-            Free to join · No credit card · Sign up with Google or email in 10 seconds
+            Free to join as a participant · No followers, no CV, no pitch deck needed
           </motion.p>
-          <motion.div variants={fadeUp} custom={0.26} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+          <motion.div variants={fadeUp} custom={0.26} className="flex flex-col sm:flex-row gap-3">
             <Link href="/home"
               className="flex items-center justify-center gap-2.5 h-13 px-8 bg-[#22FFAA] text-[#050816] rounded-xl text-[15px] font-bold shadow-[0_0_32px_rgba(34,255,170,0.3)] hover:shadow-[0_0_48px_rgba(34,255,170,0.5)] transition-all">
-              Start hunting free <ArrowRight size={16} strokeWidth={2.8} />
+              Find your first mission <ArrowRight size={16} strokeWidth={2.8} />
             </Link>
             <Link href="/workspace"
               className="flex items-center justify-center gap-2.5 h-13 px-7 border text-[#8B9CC0] rounded-xl text-[15px] font-semibold hover:text-[#F0F4FF] transition-all"
               style={{ background: 'rgba(255,255,255,.04)', borderColor: 'rgba(255,255,255,.09)' }}>
-              Post a mission as a brand <ChevronRight size={15} strokeWidth={2.5} />
+              Deploy missions for your organisation <ChevronRight size={15} strokeWidth={2.5} />
             </Link>
           </motion.div>
         </div>
