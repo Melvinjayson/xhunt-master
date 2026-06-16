@@ -657,33 +657,35 @@ export default function RootPage() {
                 className="inline-flex items-center gap-2.5 mb-8"
                 style={{ background: 'rgba(34,255,170,.06)', border: '1px solid rgba(34,255,170,.15)', borderRadius: 999, padding: '6px 16px' }}>
                 <div className="w-1.5 h-1.5 bg-[#22FFAA] rounded-full animate-pulse" />
-                <span className="text-[11px] font-semibold text-[#22FFAA] tracking-wider uppercase">AI Participation Platform · Individuals · Brands · Governments</span>
+                <span className="text-[11px] font-semibold text-[#22FFAA] tracking-wider uppercase">Discover Opportunities, powered by AI</span>
               </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
-                className="text-[clamp(2.8rem,5.5vw,4.8rem)] font-black text-[#F0F4FF] leading-[1.04] tracking-tighter mb-6">
-                Your skills are worth more
-                <br />than you&apos;re getting paid for.
+                className="text-[clamp(2.8rem,5.5vw,4.8rem)] font-black text-[#F0F4FF] leading-[1.04] tracking-tighter mb-4">
+                Do Missions.
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22FFAA] to-[#6D5DFD]">
-                  X-Hunt closes that gap.
+                  Get Rewarded.
                 </span>
               </motion.h1>
 
               <motion.p
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.16 }}
+                className="text-[1.3rem] font-bold text-[#F0F4FF] mb-5">
+                The World&apos;s First Participation Economy.
+              </motion.p>
+
+              <motion.p
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.22 }}
                 className="text-[1.08rem] text-[#8B9CC0] leading-relaxed max-w-[540px] mb-3">
-                Brands, companies, and organizations post real-world missions.
-                You complete them — go to the gym, visit a location, try a product, attend an event.
-                AI verifies your proof automatically.
-                <strong className="text-[#F0F4FF]"> Escrow releases. You get paid.</strong>
+                Get paid to contribute, explore, learn, and participate in opportunities around you.
               </motion.p>
 
               <motion.p
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-[13px] text-[#4A5578] mb-10">
-                No followers needed. No CV. No middleman. Just show up, prove it, and earn.
+                className="text-[14px] font-semibold text-[#F0F4FF] mb-10">
+                Complete missions. Build reputation. Unlock rewards.
               </motion.p>
 
               <motion.div

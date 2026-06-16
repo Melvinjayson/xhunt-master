@@ -16,6 +16,7 @@ import {
   Bell, Compass, Zap, X, ArrowRight, ArrowUpRight,
   Flame, Target, TrendingUp, Sparkles,
   Users, BarChart3, MessageSquare, ChevronRight,
+  DollarSign, BookOpen, MapPin, Briefcase, Trophy, Heart, Upload,
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { MissionCard } from '@/components/home/MissionCard';
@@ -32,10 +33,14 @@ import { createClient } from '@/lib/supabase/client';
 interface SubStatus { tier: string; isTrialActive: boolean; trialDaysLeft: number; hasUsedTrial: boolean; canUseAI: boolean; }
 
 const QUICK_LINKS = [
-  { icon: Compass,       label: 'Explore',  href: '/explore',  color: 'var(--t-accent)' },
-  { icon: Users,         label: 'Community',href: '/people',   color: 'var(--t-ai)'     },
-  { icon: BarChart3,     label: 'Missions', href: '/missions', color: 'var(--t-warn)'   },
-  { icon: MessageSquare, label: 'Messages', href: '/messages', color: 'var(--t-accent)' },
+  { icon: Compass,       label: 'Find Mission',       href: '/missions',             color: 'var(--t-accent)' },
+  { icon: DollarSign,    label: 'Earn Money',          href: '/explore',              color: '#22FFAA'         },
+  { icon: BookOpen,      label: 'Learn & Earn',        href: '/explore',              color: 'var(--t-ai)'     },
+  { icon: MapPin,        label: 'Join Nearby',         href: '/explore',              color: 'var(--t-warn)'   },
+  { icon: Briefcase,     label: 'Find Paid Gig',       href: '/explore',              color: 'var(--t-accent)' },
+  { icon: Trophy,        label: 'Create Challenge',    href: '/workspace/missions/new', color: 'var(--t-ai)'  },
+  { icon: Heart,         label: 'Contribute',          href: '/explore',              color: '#FF5C7A'         },
+  { icon: Upload,        label: 'Submit Proof',        href: '/missions',             color: 'var(--t-warn)'   },
 ];
 
 const ARCHETYPE_COLORS: Record<string, string> = {
@@ -287,7 +292,7 @@ export default function HomePage() {
         <Typography sx={{ mb: 1.5, fontSize: '10.5px', fontWeight: 700, color: 'var(--t-faint)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           Quick Access
         </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.25 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1 }}>
           {QUICK_LINKS.map(({ icon, label, href, color }) => (
             <QuickAction key={label} icon={icon} label={label} href={href} color={color} />
           ))}
@@ -351,28 +356,17 @@ export default function HomePage() {
         {/* ── Top bar ── */}
         <Box sx={{
           position: 'sticky', top: 0, zIndex: 50,
-          background: 'rgba(5,8,22,0.88)',
-          backdropFilter: 'blur(24px)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'linear-gradient(135deg, #004D30 0%, #007A4D 60%, #009954 100%)',
+          borderBottom: '1px solid rgba(255,255,255,0.12)',
           px: 3, pt: '50px', pb: '14px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          {/* Mobile logo */}
-          <Box className="md:hidden" sx={{ display: 'flex', alignItems: 'center', gap: 1.125 }}>
-            <div style={{ position: 'relative', width: 34, height: 34 }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid var(--t-accent)' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--t-accent)', letterSpacing: '-0.05em' }}>X</span>
-              </div>
-            </div>
-            <Typography sx={{ fontSize: '15px', fontWeight: 800, color: 'var(--t-txt)', letterSpacing: '-0.03em' }}>XHUNT</Typography>
-          </Box>
-          {/* Desktop greeting */}
-          <Box className="hidden md:block">
-            <Typography sx={{ fontWeight: 800, color: 'var(--t-txt)', letterSpacing: '-0.025em', fontSize: '17px' }}>
+          {/* Greeting — shown on all screen sizes, left-aligned */}
+          <Box>
+            <Typography sx={{ fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', fontSize: '17px' }}>
               {greeting()}, {userName} 👋
             </Typography>
-            <Typography sx={{ fontSize: '12px', color: 'var(--t-dim)' }}>
+            <Typography sx={{ fontSize: '12px', color: 'rgba(255,255,255,0.72)' }}>
               {active.length > 0 ? `${active.length} mission${active.length !== 1 ? 's' : ''} in progress` : done.length > 0 ? `${done.length} completed · Keep going` : 'Start your first mission'}
             </Typography>
           </Box>
@@ -409,25 +403,6 @@ export default function HomePage() {
               </Box>
             </Link>
           </Stack>
-        </Box>
-
-        {/* ── Mobile greeting ── */}
-        <Box className="md:hidden" sx={{ px: 3, pt: 3 }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 0.5 }}>
-              <Typography sx={{ fontWeight: 900, color: 'var(--t-txt)', letterSpacing: '-0.03em', fontSize: '24px' }}>
-                {greeting()}, {userName}
-              </Typography>
-              {profile?.archetype && (
-                <span style={{ fontSize: 10.5, fontWeight: 700, color: aColor, background: `${aColor}14`, border: `1px solid ${aColor}28`, borderRadius: 999, padding: '2px 9px', flexShrink: 0 }}>
-                  {profile.archetype}
-                </span>
-              )}
-            </Box>
-            <Typography sx={{ fontSize: '13.5px', color: 'var(--t-dim)', lineHeight: 1.5 }}>
-              {active.length > 0 ? `${active.length} mission${active.length !== 1 ? 's' : ''} waiting · Let's make progress.` : done.length > 0 ? `${done.length} completed · Great work.` : 'Generate your first mission to start earning.'}
-            </Typography>
-          </motion.div>
         </Box>
 
         {/* ── Freemium nudge ── */}
@@ -544,7 +519,7 @@ export default function HomePage() {
                 <Typography sx={{ mb: 1.5, fontSize: '10.5px', fontWeight: 700, color: 'var(--t-faint)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Quick Access
                 </Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1.25 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1 }}>
                   {QUICK_LINKS.map(({ icon, label, href, color }) => (
                     <QuickAction key={label} icon={icon} label={label} href={href} color={color} />
                   ))}

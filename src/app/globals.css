@@ -550,6 +550,141 @@ body {
   }
 }
 
+/* ─── Global mobile / overflow fixes ──────────────────────────────────────── */
+
+/* Prevent horizontal scroll without breaking sticky positioning */
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Images and media never overflow their container */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── Marketing page mobile ─────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  /* CTA button rows stack vertically on phones */
+  .flex.flex-wrap.gap-3 > a,
+  .flex.flex-wrap.gap-3 > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Social proof strip scrolls instead of wrapping */
+  .marketing-proof-strip {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start !important;
+    padding-bottom: 4px;
+  }
+
+  /* Phone frames section — single centred frame on mobile */
+  .hidden.md\:block {
+    display: none !important;
+  }
+}
+
+/* ─── Consumer app mobile ────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .consumer-app {
+    padding-left: 0 !important;
+  }
+
+  /* Cards & panels: reduce horizontal padding on phones */
+  .consumer-app .MuiBox-root {
+    min-width: 0;
+  }
+
+  /* Right-rail is hidden on mobile — ensure it doesn't cause overflow */
+  .consumer-app [class*="md:flex"] {
+    max-width: 100%;
+  }
+}
+
+/* Quick actions: fall back to 2-col on very small phones */
+@media (max-width: 359px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ─── Workspace / portal mobile ─────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .portal-main {
+    overflow-x: hidden;
+  }
+
+  /* Data tables scroll horizontally */
+  .table-scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Stat cards — single column on phones */
+  .workspace-stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Focus-visible ring ─────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--t-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Touch targets (a11y) ───────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+  /* Ensure tap targets are at least 44 × 44 px on touch devices */
+  a,
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 .r-grid-2-4 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
