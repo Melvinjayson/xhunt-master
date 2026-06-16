@@ -14,6 +14,16 @@ export async function POST(
   const { id: missionId } = await params;
   const supabase = createServiceClient();
 
+  // Resolve Firebase UID → user_profiles.id (UUID for FK references)
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('clerk_user_id', user.uid)
+    .maybeSingle();
+
+  if (!profile) return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+  const userId = profile.id;
+
   // Verify mission exists and is accepting participants
   const { data: mission } = await supabase
     .from('missions')
@@ -33,7 +43,7 @@ export async function POST(
   const { data: existing } = await supabase
     .from('mission_progress')
     .select('id, started_at')
-    .eq('user_id', user.uid)
+    .eq('user_id', userId)
     .eq('mission_id', missionId)
     .maybeSingle();
 
@@ -45,7 +55,7 @@ export async function POST(
   const { data: progress, error: progressErr } = await supabase
     .from('mission_progress')
     .insert({
-      user_id: user.uid,
+      user_id: userId,
       mission_id: missionId,
       tenant_id: mission.tenant_id,
       current_step_index: 0,
@@ -59,7 +69,7 @@ export async function POST(
 
   // Upsert mission state → active
   await supabase.from('mission_state').upsert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     state: 'active',
@@ -69,7 +79,7 @@ export async function POST(
 
   // Emit mission_started event into the event spine
   await supabase.from('mission_events').insert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     event_type: 'mission_started',
@@ -94,7 +104,7 @@ export async function POST(
       source: 'consumer',
       target: 'workspace',
       event_type: 'mission_accepted',
-      payload: { mission_id: missionId, user_id: user.uid, progress_id: progress.id },
+      payload: { mission_id: missionId, user_id: userId, progress_id: progress.id },
     }),
   }).catch(() => null);
 

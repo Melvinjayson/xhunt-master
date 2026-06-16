@@ -635,11 +635,8 @@ export default function RootPage() {
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="hidden lg:block absolute right-[-4%] bottom-0 w-[52%] h-[88vh] z-10">
-          <Spotlight className="-top-10 left-20" fill="#22FFAA" />
-          {/* Ambient glow */}
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 70% 60% at 55% 50%, rgba(0,200,130,0.18) 0%, rgba(0,120,90,0.07) 50%, transparent 75%)', filter: 'blur(40px)' }} />
+          className="hidden lg:block absolute right-[-14%] bottom-0 w-[56%] h-[88vh] z-10">
+          <Spotlight size={500} />
           {/* Interactive Spline 3D scene */}
           <SplineScene
             scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"

@@ -31,6 +31,16 @@ export async function POST(
 
   const supabase = createServiceClient();
 
+  // Resolve Firebase UID → user_profiles.id (UUID for FK references)
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('clerk_user_id', user.uid)
+    .maybeSingle();
+
+  if (!profile) return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+  const userId = profile.id;
+
   // Verify mission exists
   const { data: mission } = await supabase
     .from('missions')
@@ -44,7 +54,7 @@ export async function POST(
   const { data: progress } = await supabase
     .from('mission_progress')
     .select('id, current_step_index, completed_steps, started_at')
-    .eq('user_id', user.uid)
+    .eq('user_id', userId)
     .eq('mission_id', missionId)
     .maybeSingle();
 
@@ -56,7 +66,7 @@ export async function POST(
   const { data: existingValidation } = await supabase
     .from('outcome_validations')
     .select('id, status, verdict')
-    .eq('user_id', user.uid)
+    .eq('user_id', userId)
     .eq('mission_id', missionId)
     .in('status', ['pending', 'approved'])
     .maybeSingle();
@@ -85,7 +95,7 @@ export async function POST(
     const { data: newValidation, error: valErr } = await supabase
       .from('outcome_validations')
       .insert({
-        user_id: user.uid,
+        user_id: userId,
         mission_id: missionId,
         tenant_id: mission.tenant_id,
         progress_id: progress.id,
@@ -103,7 +113,7 @@ export async function POST(
 
   // Update mission_state → in_progress
   await supabase.from('mission_state').upsert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     state: 'in_progress',
@@ -113,7 +123,7 @@ export async function POST(
 
   // Emit submission_received event
   await supabase.from('mission_events').insert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     event_type: 'submission_received',
@@ -169,7 +179,7 @@ export async function POST(
 
   // Emit verification_complete event
   await supabase.from('mission_events').insert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     event_type: 'verification_complete',

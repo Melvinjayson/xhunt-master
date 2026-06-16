@@ -25,6 +25,16 @@ export async function POST(
 
   const supabase = createServiceClient();
 
+  // Resolve Firebase UID → user_profiles.id (UUID for FK references)
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('clerk_user_id', user.uid)
+    .maybeSingle();
+
+  if (!profile) return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+  const userId = profile.id;
+
   // Load validation + mission in parallel
   const [{ data: validation }, { data: mission }] = await Promise.all([
     supabase
@@ -45,7 +55,7 @@ export async function POST(
 
   // Only the submission owner or a tenant admin should be able to re-verify
   // (For now: same user; tenant admin support can be added later)
-  if (validation.user_id !== user.uid) {
+  if (validation.user_id !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -100,7 +110,7 @@ export async function POST(
     .eq('id', validation.id);
 
   await supabase.from('mission_events').insert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     event_type: 'verification_complete',

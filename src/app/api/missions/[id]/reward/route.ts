@@ -48,7 +48,9 @@ export async function POST(
 
   if (!validation) return NextResponse.json({ error: 'Validation not found' }, { status: 404 });
   if (!mission) return NextResponse.json({ error: 'Mission not found' }, { status: 404 });
-  if (validation.user_id !== user.uid) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!userProfile) return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+  const userId = userProfile.id;
+  if (validation.user_id !== userId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   if (validation.status !== 'approved') {
     return NextResponse.json({ error: 'Validation is not approved' }, { status: 409 });
   }
@@ -57,7 +59,7 @@ export async function POST(
   const { data: existingReward } = await supabase
     .from('reward_events')
     .select('id, total_payout, xp_awarded')
-    .eq('user_id', user.uid)
+    .eq('user_id', userId)
     .eq('mission_id', missionId)
     .maybeSingle();
 
@@ -71,8 +73,8 @@ export async function POST(
   }
 
   const confidenceScore = body.confidence_score ?? validation.confidence_score ?? 0;
-  const previousHunterScore = userProfile?.hunter_score ?? 0;
-  const missionsCompleted = (userProfile?.missions_completed ?? 0) + 1;
+  const previousHunterScore = userProfile.hunter_score ?? 0;
+  const missionsCompleted = (userProfile.missions_completed ?? 0) + 1;
 
   // Call reward-agent and reputation-agent in parallel via XIL orchestrator
   const [rewardResult, reputationResult] = await Promise.all([
@@ -87,7 +89,7 @@ export async function POST(
         difficulty: mission.difficulty ?? 'medium',
         confidence_score: confidenceScore,
         validation_id: body.validation_id,
-        user_id: user.uid,
+        user_id: userId,
         missions_completed: missionsCompleted,
       },
       userId: user.uid,
@@ -96,14 +98,14 @@ export async function POST(
       intelligenceFunction: 'reputation',
       objective: `Update Hunter Score for user after completing mission: ${mission.title}`,
       context: {
-        user_id: user.uid,
+        user_id: userId,
         mission_id: missionId,
         mission_title: mission.title,
         difficulty: mission.difficulty ?? 'medium',
         confidence_score: confidenceScore,
         previous_score: previousHunterScore,
         missions_completed: missionsCompleted,
-        current_tier: userProfile?.hunter_tier ?? 'Explorer',
+        current_tier: userProfile.hunter_tier ?? 'Explorer',
       },
       userId: user.uid,
     }),
@@ -141,7 +143,7 @@ export async function POST(
   const { data: rewardEvent, error: rewardErr } = await supabase
     .from('reward_events')
     .insert({
-      user_id: user.uid,
+      user_id: userId,
       mission_id: missionId,
       tenant_id: mission.tenant_id,
       validation_id: body.validation_id,
@@ -162,12 +164,12 @@ export async function POST(
   await supabase
     .from('mission_progress')
     .update({ completed_at: completedAt })
-    .eq('user_id', user.uid)
+    .eq('user_id', userId)
     .eq('mission_id', missionId);
 
   // Update mission_state → completed
   await supabase.from('mission_state').upsert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     state: 'completed',
@@ -179,7 +181,7 @@ export async function POST(
   const profileUpdates: Record<string, unknown> = {
     hunter_score: newHunterScore,
     missions_completed: missionsCompleted,
-    total_xp: (userProfile?.total_xp ?? 0) + xpAwarded,
+    total_xp: (userProfile.total_xp ?? 0) + xpAwarded,
   };
   if (tierChanged && newTier) profileUpdates.hunter_tier = newTier;
 
@@ -190,7 +192,7 @@ export async function POST(
 
   // Emit mission_completed event to mission_events spine
   await supabase.from('mission_events').insert({
-    user_id: user.uid,
+    user_id: userId,
     mission_id: missionId,
     tenant_id: mission.tenant_id,
     event_type: 'mission_completed',
@@ -216,7 +218,7 @@ export async function POST(
       event_type: 'mission_rewarded',
       payload: {
         mission_id: missionId,
-        user_id: user.uid,
+        user_id: userId,
         reward_event_id: rewardEvent.id,
         total_payout: totalPayout,
         xp_awarded: xpAwarded,

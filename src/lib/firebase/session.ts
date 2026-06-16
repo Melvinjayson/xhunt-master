@@ -5,7 +5,14 @@ export const SESSION_COOKIE = '__xhunt_fb_session';
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function getSecret(): string {
-  return process.env.SESSION_SECRET ?? 'xhunt-dev-secret-replace-in-production';
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET env var is required in production. Generate with: openssl rand -base64 32');
+    }
+    return 'xhunt-dev-secret-replace-in-production';
+  }
+  return secret;
 }
 
 async function importKey(secret: string): Promise<CryptoKey> {
