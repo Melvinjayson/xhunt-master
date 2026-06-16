@@ -620,13 +620,13 @@ export default function RootPage() {
     <div className="bg-[#050816] text-[#F0F4FF] overflow-x-hidden">
 
       {/* ─── HERO ─── */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      <section className="relative min-h-screen overflow-hidden">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 opacity-[0.022]" style={{
             backgroundImage: 'linear-gradient(rgba(34,255,170,1) 1px,transparent 1px),linear-gradient(90deg,rgba(34,255,170,1) 1px,transparent 1px)',
             backgroundSize: '52px 52px',
           }} />
-          <div className="absolute top-1/2 right-[8%] -translate-y-1/2 w-[600px] h-[600px] bg-[#22FFAA]/5 blur-[140px] rounded-full" />
+          <div className="absolute top-[30%] right-[10%] w-[500px] h-[500px] bg-[#22FFAA]/4 blur-[130px] rounded-full" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#6D5DFD]/4 blur-[100px] rounded-full" />
         </div>
 
@@ -635,7 +635,7 @@ export default function RootPage() {
           initial={{ opacity: 0, x: 60, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="hidden lg:block absolute right-[-14%] bottom-0 w-[56%] h-[88vh] z-10">
+          className="hidden lg:block absolute right-[-14%] bottom-0 w-[56%] h-[90vh] z-10">
           <Spotlight size={500} />
           {/* Interactive Spline 3D scene */}
           <SplineScene
@@ -647,8 +647,8 @@ export default function RootPage() {
             style={{ background: 'radial-gradient(ellipse, rgba(34,255,170,.22) 0%, transparent 70%)', filter: 'blur(28px)' }} />
         </motion.div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
-          <div className="max-w-[620px]">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-32 lg:pt-36 pb-24 w-full">
+          <div className="max-w-[560px]">
               <motion.div
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                 className="inline-flex items-center gap-2.5 mb-8"

@@ -81,8 +81,8 @@ export default function Nav() {
     <header className={cn(
       'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
       scrolled
-        ? 'bg-[rgba(5,8,22,0.88)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.06)] shadow-[0_1px_24px_rgba(0,0,0,0.45)]'
-        : 'bg-transparent',
+        ? 'bg-[rgba(5,8,22,0.92)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.06)] shadow-[0_1px_24px_rgba(0,0,0,0.45)]'
+        : 'bg-[rgba(5,8,22,0.55)] backdrop-blur-md',
     )}>
       <nav className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Logo */}

@@ -39,11 +39,20 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<FirebaseAuthState>({ user: null, loading: true });
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      await syncSession(user);
-      setState({ user, loading: false });
-    });
-    return unsub;
+    if (!auth) {
+      setState({ user: null, loading: false });
+      return;
+    }
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onAuthStateChanged(auth, async (user) => {
+        await syncSession(user);
+        setState({ user, loading: false });
+      });
+    } catch {
+      setState({ user: null, loading: false });
+    }
+    return () => unsub?.();
   }, []);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
