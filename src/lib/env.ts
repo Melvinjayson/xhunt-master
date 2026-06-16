@@ -7,19 +7,20 @@ const serverSchema = z.object({
   STRIPE_SECRET_KEY:          z.string().min(1),
   STRIPE_WEBHOOK_SECRET:      z.string().min(1),
   STRIPE_PRO_PRICE_ID:        z.string().min(1),
-  // Clerk keys are optional — auth has moved to Supabase
-  CLERK_SECRET_KEY:           z.string().optional(),
-  CLERK_WEBHOOK_SECRET:       z.string().optional(),
+  SESSION_SECRET:             z.string().min(32).optional(),
 });
 
 const publicSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL:           z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY:      z.string().min(1),
-  // Clerk publishable key is optional — auth has moved to Supabase
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:  z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL:              z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY:         z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_API_KEY:          z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:      z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID:       z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:   z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_APP_ID:           z.string().min(1),
 });
 
-// Typed accessor — camelCase aliases kept for backward compatibility
 export const env = {
   groqApiKey:             process.env.GROQ_API_KEY ?? '',
   anthropicApiKey:        process.env.ANTHROPIC_API_KEY ?? '',
@@ -27,14 +28,18 @@ export const env = {
   stripeWebhookSecret:    process.env.STRIPE_WEBHOOK_SECRET ?? '',
   stripeProPriceId:       process.env.STRIPE_PRO_PRICE_ID ?? '',
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-  clerkSecretKey:         process.env.CLERK_SECRET_KEY ?? '',
-  clerkWebhookSecret:     process.env.CLERK_WEBHOOK_SECRET ?? '',
+  sessionSecret:          process.env.SESSION_SECRET ?? '',
 } as const;
 
 export const publicEnv = {
-  supabaseUrl:          process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  supabaseAnonKey:      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-  clerkPublishableKey:  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '',
+  supabaseUrl:                  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+  supabaseAnonKey:              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  firebaseApiKey:               process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
+  firebaseAuthDomain:           process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
+  firebaseProjectId:            process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '',
+  firebaseStorageBucket:        process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
+  firebaseMessagingSenderId:    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
+  firebaseAppId:                process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? '',
 } as const;
 
 export function assertProductionEnv(): void {

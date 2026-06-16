@@ -1,97 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { parseSessionCookie, SESSION_COOKIE } from '@/lib/firebase/session';
 
-const PUBLIC_ROUTES = new Set([
-  '/',
-  '/about',
-  '/blog',
-  '/careers',
-  '/contact',
-  '/pricing',
-  '/missions',
-  '/sign-in',
-  '/sign-up',
-  '/privacy',
-  '/terms',
-  '/security',
-  '/cookies',
-  '/consumer',
-  '/enterprise',
-  '/developers',
-  '/use-cases',
-  '/marketplace',
-  '/mission-control',
-  '/get-started',
-]);
-
-function isPublic(pathname: string): boolean {
-  if (PUBLIC_ROUTES.has(pathname)) return true;
-  for (const prefix of PUBLIC_ROUTES) {
-    if (prefix !== '/' && pathname.startsWith(prefix + '/')) return true;
-  }
-  // API routes that are public
-  if (pathname.startsWith('/api/clerk/')) return true;
-  if (pathname.startsWith('/api/contact')) return true;
-  if (pathname.startsWith('/api/cron/')) return true;
-  if (pathname.startsWith('/api/stripe/webhook')) return true;
-  if (pathname.startsWith('/auth/')) return true;
-  return false;
-}
-
-const AUTH_ROUTES = new Set(['/sign-in', '/sign-up']);
-function isAuthRoute(pathname: string) {
-  return AUTH_ROUTES.has(pathname) || pathname.startsWith('/sign-in/') || pathname.startsWith('/sign-up/');
-}
+// Consumer routes (/home, /explore, /missions, /profile, /messages) are public
+// — they render in preview mode when unauthenticated.
+const PROTECTED_PREFIXES = ['/workspace', '/admin', '/get-started'];
+const AUTH_REDIRECT_PREFIXES = ['/sign-in', '/sign-up'];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  let response = NextResponse.next({ request: req });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => req.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          response = NextResponse.next({ request: req });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        },
-      },
-    }
-  );
+  // API routes: auth handled per-route. Static assets: always pass through.
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
+    return NextResponse.next();
+  }
 
+  const sessionCookie = req.cookies.get(SESSION_COOKIE)?.value;
   let session = null;
-  try {
-    const result = await supabase.auth.getSession();
-    session = result.data?.session ?? null;
-  } catch {
-    // Supabase unreachable (missing/invalid credentials) — treat as unauthenticated
-  }
+  if (sessionCookie) session = await parseSessionCookie(sessionCookie);
 
-  // Authenticated users hitting sign-in/sign-up or marketing root → redirect to app
-  if (isAuthRoute(pathname) && session?.user) {
+  // Signed-in users don't need to see auth pages
+  if (session && AUTH_REDIRECT_PREFIXES.some(p => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL('/home', req.url));
   }
 
-  if (pathname === '/' && session?.user) {
-    return NextResponse.redirect(new URL('/home', req.url));
+  // Guard protected routes
+  if (PROTECTED_PREFIXES.some(p => pathname.startsWith(p))) {
+    if (!session) {
+      const dest = new URL('/sign-in', req.url);
+      dest.searchParams.set('redirect_url', pathname);
+      const res = NextResponse.redirect(dest);
+      // Clear any stale/expired cookie
+      if (sessionCookie) {
+        res.cookies.set(SESSION_COOKIE, '', {
+          maxAge: 0, path: '/', httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+        });
+      }
+      return res;
+    }
   }
 
-  // Unauthenticated users hitting protected routes → redirect to sign-in
-  if (!isPublic(pathname) && !session?.user) {
-    const signIn = new URL('/sign-in', req.url);
-    signIn.searchParams.set('redirect_url', pathname);
-    return NextResponse.redirect(signIn);
-  }
-
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|eot|css|js|map)).*)',
   ],
 };
+

@@ -5,27 +5,33 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { createClient } from '@/lib/supabase/client';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user: firebaseUser, loading } = useFirebaseAuth();
   const [authorized, setAuthorized] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
+    if (loading) return;
+
+    // Preview mode: allow access without auth
+    if (!firebaseUser) {
+      setAuthorized(true);
+      return;
+    }
+
     async function checkAccess() {
       const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      if (!authUser) { router.replace('/sign-in?redirect_url=/admin'); return; }
-
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role, tenant_id, onboarding_complete')
-        .eq('id', authUser.id)
-        .single();
+        .eq('clerk_user_id', firebaseUser!.uid)
+        .maybeSingle();
 
       if (!profile?.tenant_id || !profile?.onboarding_complete) {
         router.replace('/get-started');
@@ -40,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       setAuthorized(true);
     }
-    checkAccess();
-  }, [router]);
+    void checkAccess();
+  }, [loading, firebaseUser, router]);
 
   if (!authorized) {
     return (

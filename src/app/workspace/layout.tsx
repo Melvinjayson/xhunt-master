@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar';
 import { createClient } from '@/lib/supabase/client';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 
 interface WorkspaceUser {
   orgName: string;
@@ -17,23 +18,28 @@ interface WorkspaceUser {
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user: firebaseUser, loading } = useFirebaseAuth();
   const [user, setUser] = useState<WorkspaceUser | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   useEffect(() => {
+    if (loading) return;
+
+    // Preview mode: show workspace with a guest state when not authenticated
+    if (!firebaseUser) {
+      setUser({ orgName: 'Preview Org', plan: 'pro', userName: 'Preview User', userRole: 'tenant_admin', avatarUrl: null });
+      return;
+    }
+
     async function boot() {
       const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      if (!authUser) { router.replace('/sign-in?redirect_url=/workspace'); return; }
-
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role, tenant_id, display_name, avatar_url, onboarding_complete')
-        .eq('id', authUser.id)
-        .single();
+        .eq('clerk_user_id', firebaseUser!.uid)
+        .maybeSingle();
 
       if (!profile?.tenant_id || !profile?.onboarding_complete) {
         router.replace('/get-started');
@@ -60,8 +66,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         avatarUrl: profile.avatar_url,
       });
     }
-    boot();
-  }, [router]);
+    void boot();
+  }, [loading, firebaseUser, router]);
 
   if (!user) {
     return (

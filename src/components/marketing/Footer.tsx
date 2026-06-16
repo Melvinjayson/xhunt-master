@@ -74,7 +74,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <div className="mb-4">
-              <Logo size="sm" href="/" />
+              <Logo size="xs" href="/" />
             </div>
             <p className="text-sm text-txt-dim leading-relaxed max-w-[210px]">
               The AI Mission Operating System. Turn goals into outcomes at scale.

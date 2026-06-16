@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown, ArrowRight, Sun, Moon } from 'lucide-react';
-import { useSupabaseUser, useSupabaseSignOut } from '@/hooks/useSupabaseUser';
+import { useFirebaseAuth, useFirebaseSignOut } from '@/hooks/useFirebaseUser';
 import { cn } from '@/lib/cn';
 import Logo from '@/components/Logo';
 
@@ -57,8 +57,8 @@ export default function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname    = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, isLoaded } = useSupabaseUser();
-  const signOut = useSupabaseSignOut();
+  const { user, loading } = useFirebaseAuth();
+  const signOut = useFirebaseSignOut();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -81,8 +81,8 @@ export default function Nav() {
     <header className={cn(
       'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
       scrolled
-        ? 'bg-[rgba(5,8,22,0.88)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.06)] shadow-[0_1px_24px_rgba(0,0,0,0.45)]'
-        : 'bg-transparent',
+        ? 'bg-[rgba(5,8,22,0.92)] backdrop-blur-2xl border-b border-[rgba(255,255,255,0.06)] shadow-[0_1px_24px_rgba(0,0,0,0.45)]'
+        : 'bg-[rgba(5,8,22,0.55)] backdrop-blur-md',
     )}>
       <nav className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Logo */}
@@ -147,20 +147,20 @@ export default function Nav() {
         {/* CTA */}
         <div className="hidden lg:flex items-center gap-2">
           <ThemeToggle />
-          {isLoaded && !user && (
+          {!loading && !user && (
             <>
               <Link href="/sign-in"
                 className="px-4 py-2 text-sm font-medium text-txt-dim hover:text-txt transition-colors">
                 Sign in
               </Link>
-              <Link href="/sign-up"
+              <Link href="/home"
                 className="flex items-center gap-1.5 px-4 py-2 bg-accent text-[#050816] rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(34,255,170,0.28)] hover:shadow-[0_0_24px_rgba(34,255,170,0.45)] hover:bg-accent-dark transition-all duration-200">
                 Start Exploring
                 <ArrowRight size={13} strokeWidth={2.8} />
               </Link>
             </>
           )}
-          {isLoaded && user && (
+          {!loading && user && (
             <>
               <Link href="/home"
                 className="flex items-center gap-1.5 px-4 py-2 bg-accent/10 text-accent border border-accent/20 rounded-lg text-sm font-bold hover:bg-accent/15 transition-all duration-200">
@@ -217,7 +217,7 @@ export default function Nav() {
                 <ArrowRight size={13} strokeWidth={2.5} className="text-[#6D5DFD] ml-auto" />
               </Link>
               <Link href="/sign-in" className="px-3 py-2.5 text-sm font-medium text-txt-dim">Sign in</Link>
-              <Link href="/sign-up" className="flex items-center justify-center gap-2 h-12 bg-accent text-[#050816] rounded-xl text-sm font-bold mt-1 shadow-[0_4px_20px_rgba(34,255,170,0.35)]">
+              <Link href="/home" className="flex items-center justify-center gap-2 h-12 bg-accent text-[#050816] rounded-xl text-sm font-bold mt-1 shadow-[0_4px_20px_rgba(34,255,170,0.35)]">
                 Start Exploring
                 <ArrowRight size={14} strokeWidth={2.8} />
               </Link>

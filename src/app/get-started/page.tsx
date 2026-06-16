@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowRight, Sparkles, Brain, Shield, Lock } from 'lucide-react';
 import { saveState, loadState, saveProfile } from '@/lib/store';
 import { createClient } from '@/lib/supabase/client';
+import { useFirebaseAuth } from '@/hooks/useFirebaseUser';
 import type { ImpactProfile } from '@/lib/types';
 
 /* ─── design tokens ─── */
@@ -189,6 +190,7 @@ function ImpactDNAReveal({ profile, onContinue }: { profile: ImpactProfile; onCo
 /* ─── Main page ─── */
 export default function GetStartedPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useFirebaseAuth();
   const [authChecked, setAuthChecked] = useState(false);
   const [userId, setUserId]           = useState<string | null>(null);
   const [messages, setMessages]       = useState<Message[]>([]);
@@ -204,38 +206,37 @@ export default function GetStartedPage() {
 
   // ── Auth guard ───────────────────────────────────────────────────────────
   useEffect(() => {
-    async function checkAuth() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace('/sign-up');
-        return;
-      }
-      setUserId(user.id);
+    if (authLoading) return;
 
-      // Check if already onboarded (localStorage fast-path)
-      const state = loadState();
-      if (state.user?.onboardingComplete) {
-        router.replace('/home');
-        return;
-      }
+    // Preview mode: allow access without auth
+    if (!user) {
+      setAuthChecked(true);
+      return;
+    }
 
-      // Also check DB in case localStorage was cleared
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('onboarding_complete')
-        .eq('id', user.id)
-        .single();
+    async function checkOnboarding() {
+      setUserId(user!.uid);
 
-      if (profile?.onboarding_complete) {
-        router.replace('/home');
-        return;
+      try {
+        const supabase = createClient();
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('onboarding_complete')
+          .eq('clerk_user_id', user!.uid)
+          .maybeSingle();
+
+        if (profile?.onboarding_complete) {
+          router.replace('/home');
+          return;
+        }
+      } catch {
+        // DB unavailable — proceed with onboarding
       }
 
       setAuthChecked(true);
     }
-    checkAuth();
-  }, [router]);
+    void checkOnboarding();
+  }, [authLoading, user, router]);
 
   // Seed Xeno's opening message
   useEffect(() => {
@@ -313,7 +314,7 @@ export default function GetStartedPage() {
             interests:           data.profile.causes,
             goals:               data.profile.motivations,
             onboarding_complete: true,
-          }).eq('id', userId);
+          }).eq('clerk_user_id', userId ?? '');
         }
 
         setTimeout(() => { setProfile(data.profile!); setPhase('complete'); }, 2800);

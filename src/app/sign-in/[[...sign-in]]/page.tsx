@@ -4,30 +4,53 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  type UserCredential,
+} from 'firebase/auth';
+import { auth, getGoogleProvider } from '@/lib/firebase/client';
 import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect_url') ?? '/home';
+  const redirectTo = searchParams.get('redirect_url') ?? '/home';
 
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw]     = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [oauthLoading, setOauthLoading] = useState(false);
-  const [error, setError]       = useState<string | null>(null);
+  const [email, setEmail]             = useState('');
+  const [password, setPassword]       = useState('');
+  const [showPw, setShowPw]           = useState(false);
+  const [loading, setLoading]         = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError]             = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function afterSignIn(cred: UserCredential) {
+    const token = await cred.user.getIdToken();
+    const res   = await fetch('/api/auth/session', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token }),
+    });
+    if (!res.ok) throw new Error('Session creation failed');
+    router.replace(redirectTo);
+  }
+
+  async function handleEmailSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      if (authError) { setError(authError.message); return; }
-      router.replace(redirectUrl);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await afterSignIn(cred);
+    } catch (err: unknown) {
+      const msg = (err as { code?: string })?.code;
+      if (msg === 'auth/invalid-credential' || msg === 'auth/user-not-found' || msg === 'auth/wrong-password') {
+        setError('Incorrect email or password.');
+      } else if (msg === 'auth/too-many-requests') {
+        setError('Too many attempts. Please try again later.');
+      } else {
+        setError('Sign in failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -35,16 +58,17 @@ export default function SignInPage() {
 
   async function handleGoogle() {
     setError(null);
-    setOauthLoading(true);
+    setGoogleLoading(true);
     try {
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: `${window.location.origin}/auth/callback?next=${redirectUrl}` },
-      });
-      if (authError) setError(authError.message);
+      const cred = await signInWithPopup(auth, getGoogleProvider());
+      await afterSignIn(cred);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+        setError('Google sign-in failed. Please try again.');
+      }
     } finally {
-      setOauthLoading(false);
+      setGoogleLoading(false);
     }
   }
 
@@ -58,7 +82,8 @@ export default function SignInPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--t-bg, #050816)', display: 'flex' }}>
-      {/* ── Left panel (desktop) ── */}
+
+      {/* ── Left branding panel (desktop) ── */}
       <div
         style={{ display: 'none', position: 'relative', flex: '0 0 52%', overflow: 'hidden',
           background: 'linear-gradient(135deg, #020A14 0%, #041220 40%, #051A18 100%)' }}
@@ -70,9 +95,6 @@ export default function SignInPage() {
           <div style={{ position: 'relative', width: '100%', maxWidth: 480, aspectRatio: '4/3' }}>
             <Image src="/xhunt-logo.png" alt="" fill
               style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 80px rgba(0,200,130,0.35))' }} priority />
-            <div style={{ position: 'absolute', inset: '10%',
-              background: 'radial-gradient(ellipse at 45% 40%, rgba(0,210,140,0.22) 0%, rgba(0,160,110,0.14) 35%, transparent 85%)',
-              borderRadius: '50%', filter: 'blur(24px)' }} />
           </div>
         </div>
         <div style={{ position: 'relative', zIndex: 2, marginTop: 'auto', paddingTop: 60 }}>
@@ -95,8 +117,8 @@ export default function SignInPage() {
           background: 'radial-gradient(circle, rgba(0,200,130,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ width: '100%', maxWidth: 400 }}>
-          <div style={{ marginBottom: 40 }}>
-            <Image src="/xhunt-logo.png" alt="X-hunt" width={132} height={132} style={{ objectFit: 'contain' }} priority />
+          <div style={{ marginBottom: 36 }}>
+            <Image src="/xhunt-logo.png" alt="X-hunt" width={100} height={100} style={{ objectFit: 'contain' }} priority />
           </div>
 
           <h2 style={{ fontSize: 24, fontWeight: 900, color: '#F0F4FF', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
@@ -104,12 +126,12 @@ export default function SignInPage() {
           </h2>
           <p style={{ fontSize: 14, color: '#8B9CC0', margin: '0 0 28px' }}>Sign in to your X-hunt account</p>
 
-          {/* Google OAuth */}
-          <button onClick={handleGoogle} disabled={oauthLoading}
+          {/* Google */}
+          <button onClick={handleGoogle} disabled={googleLoading || loading}
             style={{ ...inputStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
               cursor: 'pointer', marginBottom: 20, padding: '12px', fontWeight: 600,
-              opacity: oauthLoading ? 0.7 : 1 }}>
-            {oauthLoading ? <Loader2 size={16} className="animate-spin" /> : (
+              opacity: googleLoading ? 0.7 : 1 }}>
+            {googleLoading ? <Loader2 size={16} style={{ animation: 'spin .7s linear infinite' }} /> : (
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
                 <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
@@ -126,14 +148,13 @@ export default function SignInPage() {
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#8B9CC0', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
                 Email
               </label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                required placeholder="you@example.com"
-                style={inputStyle} />
+                required placeholder="you@example.com" style={inputStyle} />
             </div>
 
             <div>
@@ -160,13 +181,15 @@ export default function SignInPage() {
               </div>
             )}
 
-            <button type="submit" disabled={loading}
+            <button type="submit" disabled={loading || googleLoading}
               style={{ height: 46, borderRadius: 12, background: '#22FFAA', color: '#050816',
                 fontWeight: 700, fontSize: 14, fontFamily: 'inherit', border: 'none',
                 cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 boxShadow: '0 4px 20px rgba(34,255,170,0.3)', transition: 'all .2s' }}>
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <>Sign in <ArrowRight size={14} strokeWidth={2.5} /></>}
+              {loading
+                ? <Loader2 size={16} style={{ animation: 'spin .7s linear infinite' }} />
+                : <>Sign in <ArrowRight size={14} strokeWidth={2.5} /></>}
             </button>
           </form>
 
@@ -178,6 +201,8 @@ export default function SignInPage() {
           </p>
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

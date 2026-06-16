@@ -11,8 +11,8 @@ interface LogoProps {
 }
 
 const HEIGHT: Record<Size, string> = {
-  xs: 'h-10',
-  sm: 'h-14',
+  xs: 'h-8',
+  sm: 'h-10',
   md: 'h-20',
   lg: 'h-28',
   xl: 'h-36',

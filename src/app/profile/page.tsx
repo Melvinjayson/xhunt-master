@@ -109,7 +109,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const state = loadState();
-    if (!state.user?.onboardingComplete) { router.replace('/get-started'); return; }
     setInterests(state.user?.interests ?? []);
     setCompleted(state.completedHunts);
     setStreak(state.streak);
@@ -121,19 +120,20 @@ export default function ProfilePage() {
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
       setLoading(true);
       try {
+        const { getAuth } = await import('firebase/auth');
         const { createClient } = await import('@/lib/supabase/client');
         const sb = createClient();
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) { setLoading(false); return; }
+        const firebaseUser = getAuth().currentUser;
+        if (!firebaseUser) { setLoading(false); return; }
 
-        const { data: profile } = await sb.from('user_profiles').select('display_name, interests').eq('id', user.id).single();
+        const { data: profile } = await sb.from('user_profiles').select('display_name, interests').eq('clerk_user_id', firebaseUser.uid).single();
         if (profile?.display_name) setName(profile.display_name);
         if (profile?.interests?.length) setInterests(profile.interests);
 
         const { data: progress } = await sb
           .from('mission_progress')
           .select('mission_id, completed_at')
-          .eq('user_id', user.id)
+          .eq('user_id', firebaseUser.uid)
           .not('completed_at', 'is', null)
           .order('completed_at', { ascending: false });
 
